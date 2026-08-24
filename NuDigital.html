@@ -1668,7 +1668,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
 <script>
 // ===================== SHARED UTILS =====================
-const APP_BUILD = '04.08.2026 19:10';
+const APP_BUILD = '24.08.2026 09:27';
 const DAYS = ['MO','DI','MI','DO','FR','SA','SO'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
@@ -3642,8 +3642,74 @@ function qkGenericCats() {
   ];
 }
 
-// Von Jacky am Carlsberg-Tablet angepasst, per "zum Kopieren" übernommen (2026-07-22) — auf User-Wunsch 1:1 auch für Restaurant und Casa übernommen
-function qkGastroCats() {
+// Carlsberg Bar: eigene Struktur seit 21.08.2026 - vorher mit Restaurant geteilt (qkGastroCats),
+// aber die neuen Positionen (Brezelmaschine, Eismaschine, Gläserregal, Gläserrunde, To-Go-Kühlschrank)
+// gibt es nur an der Bar. Deshalb aufgeteilt in qkCarlsbergCats() und qkRestaurantCats().
+function qkCarlsbergCats() {
+  return [
+    { name: 'Sauberkeit und Zustand', fragen: [
+      'Eingangsbereich und Außenbereich sind sauber und einladend.',
+      'Beleuchtung und Logo/Beschilderung sind sauber und funktionstüchtig.',
+      'Kassenbereich ist gepflegt und aufgeräumt.',
+      'Tische und Stühle sind sauber und ordentlich platziert.',
+      'Bar-/Tresenbereich ist sauber (Arbeitsfläche, Regale, Mise en place).',
+      'Kaffeestation ist sauber und funktionsfähig.',
+      'Bierstation / Zapfanlage ist sauber und funktionsfähig.',
+      'Ofen und Brezelmaschine sind sauber und in einwandfreiem Zustand.',
+      'Kühlschränke und Kühlvitrinen sind sauber und funktionsfähig (innen & außen).',
+      'Fußboden ist gekehrt/gewischt und frei von Verschmutzungen.',
+      'Wände, Dekoration und Ablagen sind sauber und in gutem Zustand.',
+      'Mülleimer sind geleert und nicht übervoll.',
+      'Lüftung/Dunstabzug ist sauber und ohne Fettablagerungen.',
+      'Lagerräume sind aufgeräumt und sauber.',
+      'Glasflächen sind sauber.',
+      'To-Go-Kühlschrank ist aufgefüllt.',
+      'Gläserregal ist staubfrei.',
+      'Eismaschine ist sauber.',
+      'Gläserrunde: Gläser werden regelmäßig eingesammelt.',
+    ]},
+    { name: 'Qualität', fragen: [
+      'Angebotene Speisen/Getränke entsprechen der beschriebenen Rezeptur/dem Standard.',
+      'MHD-Kontrolle wird eingehalten, keine abgelaufenen Waren im Verkauf.',
+      'Speisen/Getränke werden in der richtigen Temperatur serviert.',
+      'Präsentation der Speisen/Getränke ist ansprechend und einheitlich.',
+      'Frische von Obst, Gemüse und Kräutern ist erkennbar gegeben.',
+      'Gläser und Geschirr sind sauber, poliert und ohne Kalkflecken.',
+    ]},
+    { name: 'Service', fragen: [
+      'Gäste werden zeitnah begrüßt und bedient.',
+      'Mitarbeiter treten freundlich und gepflegt auf (Kleidung, Auftreten).',
+      'Service macht Zusatzverkäufe und benennt Produkte beim Namen.',
+      'Wartezeiten auf Getränke/Speisen sind angemessen.',
+      'Reklamationen werden professionell und lösungsorientiert behandelt.',
+      'Tische werden zeitnah abgeräumt und sauber gewischt.',
+    ]},
+    { name: 'Operative Qualitätssicherung', fragen: [
+      'Warendruck-/Bestandskontrolle wird regelmäßig durchgeführt.',
+      'Bruchliste wird korrekt und zeitnah geführt.',
+      'Putzplan-Aufgaben sind für den aktuellen Tag vollständig abgehakt.',
+      'Kühltemperaturen werden dokumentiert und liegen im Sollbereich.',
+      'Wareneingang wird kontrolliert (Menge, Qualität, Kühlkette).',
+    ]},
+    { name: 'Administratives', fragen: [
+      'Preisschilder/Speisekarten sind aktuell und korrekt.',
+      'Allergen- und Zusatzstoffkennzeichnung ist vorhanden und aktuell.',
+      'Erforderliche Aushänge (Notfallnummern) sind vorhanden.',
+      'Dienstpläne sind aktuell und für Mitarbeiter einsehbar.',
+      'Kassenabschluss/Dokumentation wird ordnungsgemäß geführt.',
+    ]},
+    { name: 'Arbeitssicherheit', fragen: [
+      'Feuerlöscher sind vorhanden, geprüft und leicht zugänglich.',
+      'Erste-Hilfe-Kasten ist vollständig und leicht zugänglich.',
+      'Rutschgefahr wird durch "Nass"-Hinweisschilder vermieden.',
+      'Arbeitsschutzkleidung (z.B. Schnittschutz, rutschfeste Schuhe) wird getragen.',
+      'Elektrogeräte und Kabel sind in einwandfreiem Zustand (keine sichtbaren Schäden).',
+    ]},
+  ];
+}
+
+// NU Restaurant: eigene Struktur seit 21.08.2026 (Aufspaltung von qkGastroCats(), Inhalt unveraendert)
+function qkRestaurantCats() {
   return [
     { name: 'Sauberkeit und Zustand', fragen: [
       'Eingangsbereich und Außenbereich sind sauber und einladend.',
@@ -3758,7 +3824,8 @@ function qkCasaCats() {
 
 function qkDefaultStruktur(standortId) {
   const cats = standortId === 'casa' ? qkCasaCats()
-    : ['carlsberg', 'restaurant'].includes(standortId) ? qkGastroCats()
+    : standortId === 'carlsberg' ? qkCarlsbergCats()
+    : standortId === 'restaurant' ? qkRestaurantCats()
     : qkGenericCats();
   return qkCatsToStruktur(cats);
 }
