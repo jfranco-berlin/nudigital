@@ -4,7 +4,7 @@
 // gespeicherte Version aus dem Cache gezeigt (Offline-Fähigkeit).
 // Icons/Manifest: Cache-first, ändern sich praktisch nie.
 
-const CACHE_VERSION = 'nudigital-v7';
+const CACHE_VERSION = 'nudigital-v8';
 const APP_SHELL = [
   './NuDigital.html',
   './manifest.json',
