@@ -858,9 +858,9 @@ select.text-input { appearance: none; background-image: linear-gradient(45deg, t
     <div class="guide-num">5</div>
     <div class="guide-text">
       <div class="guide-title">Update aufs Tablet holen & lokale Version zurücksetzen</div>
-      <b>Update holen:</b> Neue Datei (Mail-Anhang oder USB) an der gleichen Stelle wie die alte ablegen/ersetzen. Das App-Icon auf dem Startbildschirm bleibt bestehen, nichts muss neu eingerichtet werden.<br><br>
-      <b>Danach wichtig:</b> Im betroffenen Bereich auf "↺ Auf Standard zurücksetzen" tippen. Sonst zeigt das Tablet weiter die alte, lokal gespeicherte Version an und blendet die neue dauerhafte Änderung von Jacky aus.<br><br>
-      <b>Tablet ist neu / noch nicht eingerichtet:</b> Datei per Mail oder USB aufs Tablet bringen → mit <b>Chrome</b> öffnen → Chrome-Menü → <b>"Zum Startbildschirm hinzufügen"</b> (nur einmalig nötig).
+      <b>Update kommt automatisch:</b> Die App aktualisiert sich beim Öffnen selbst, solange Internet da ist – nichts ablegen, nichts ersetzen. Ob ein Gerät aktuell ist, steht oben als „Stand: …". Erscheint unten der Balken <b>„🔄 Neue Version verfügbar"</b>, einmal auf <b>„Jetzt aktualisieren"</b> tippen.<br><br>
+      <b>Nach einer Katalog-/Aufgaben-Änderung von Jacky:</b> im betroffenen Bereich auf <b>"↺ Auf Standard zurücksetzen"</b> tippen. Sonst zeigt das Tablet weiter die alte, lokal gespeicherte Fassung (Override) und blendet die neue dauerhafte Änderung aus. Ein rotes <b>„⚠️ Änderung"</b>-Zeichen auf der Kachel zeigt, wo noch ein Override liegt.<br><br>
+      <b>Gerät ist neu / noch nicht eingerichtet:</b> im Browser die Adresse <b>https://jfranco-berlin.github.io/nudigital/</b> öffnen → Menü → <b>"Zum Startbildschirm hinzufügen"</b> (oder den Knopf <b>„📲 Als App installieren"</b>). Nur einmalig nötig.
     </div>
   </div>
 
@@ -1717,7 +1717,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
 <script>
 // ===================== SHARED UTILS =====================
-const APP_BUILD = '27.08.2026 18:03';
+const APP_BUILD = '27.08.2026 18:10';
 const DAYS = ['MO','DI','MI','DO','FR','SA','SO'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
