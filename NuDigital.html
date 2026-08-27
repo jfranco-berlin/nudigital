@@ -773,9 +773,11 @@ select.text-input { appearance: none; background-image: linear-gradient(45deg, t
   <div id="hubChangesBox"></div>
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0 4px;">
     <button type="button" onclick="nuSaveAsFile()" style="background:#1a1a2e; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:700; font-size:0.9rem; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; min-height:40px;">💾 Datei speichern &amp; weitergeben</button>
+    <button type="button" onclick="nuPickImportFile()" style="background:#0369a1; color:#fff; border:none; padding:10px 16px; border-radius:8px; font-weight:700; font-size:0.9rem; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; min-height:40px;">📥 Stand aus Datei laden</button>
+    <input type="file" id="nuImportFileInput" accept=".html,text/html" style="display:none" onchange="nuHandleImportFile(this)">
     <span id="nuDatenstand" style="font-size:0.8rem; color:#666;"></span>
   </div>
-  <div style="font-size:0.75rem; color:#888; margin-bottom:4px;">Erzeugt eine Datei mit dem aktuellen Stand — per Mail/AirDrop/WhatsApp an ein anderes Gerät verschickbar. Kein Live-Sync: Stand vom Moment des Speicherns.</div>
+  <div style="font-size:0.75rem; color:#888; margin-bottom:4px;"><b>💾 Speichern</b> (dunkel): erzeugt eine Datei mit dem aktuellen Stand — per Mail/AirDrop/WhatsApp an ein anderes Gerät verschickbar. <b>📥 Laden</b> (blau): eine so erhaltene Datei einlesen — die Einträge werden zu den vorhandenen hinzugefügt, nichts wird gelöscht. Kein Live-Sync: Stand vom Moment des Speicherns.</div>
   <div class="tool-grid">
     <div class="tool-card" style="border-top-color:#1a1a2e" onclick="showPutzplanHome()">
       <div class="tool-icon">🧹</div>
@@ -1677,7 +1679,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
 <script>
 // ===================== SHARED UTILS =====================
-const APP_BUILD = '27.08.2026 17:12';
+const APP_BUILD = '27.08.2026 17:36';
 const DAYS = ['MO','DI','MI','DO','FR','SA','SO'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
@@ -1810,6 +1812,109 @@ function nuApplyImportedData(data) {
   }
   const t = (data._meta && data._meta.savedAt) || nuNowISO();
   try { localStorage.setItem('nu_meta', JSON.stringify({ savedAt: t })); } catch (e) {}
+}
+
+// ---- Zusammenführen statt Überschreiben (für "📥 Stand aus Datei laden") ----
+// Regeln:
+//  • Listen (Bruchmeldungen, Notizen …): Einträge beider Geräte werden vereint,
+//    exakt gleiche Einträge nur einmal behalten.
+//  • Objekte (Häkchen, Unterschriften …): Feld für Feld zusammengeführt; ein gesetztes
+//    Häkchen (true) bleibt gesetzt; ein leeres Feld überschreibt kein ausgefülltes.
+//  • Einzelwerte: der eingelesene Wert gewinnt, außer er ist leer.
+function nuMergeValue(current, incoming) {
+  if (Array.isArray(current) && Array.isArray(incoming)) {
+    const seen = new Set(current.map(x => JSON.stringify(x)));
+    const merged = current.slice();
+    let added = 0;
+    for (const item of incoming) {
+      const sig = JSON.stringify(item);
+      if (!seen.has(sig)) { seen.add(sig); merged.push(item); added++; }
+    }
+    return { value: merged, added };
+  }
+  if (current && incoming && typeof current === 'object' && typeof incoming === 'object'
+      && !Array.isArray(current) && !Array.isArray(incoming)) {
+    const out = Object.assign({}, current);
+    let added = 0;
+    for (const key of Object.keys(incoming)) {
+      if (!(key in out)) { out[key] = incoming[key]; added++; continue; }
+      const inv = incoming[key], cuv = out[key];
+      if (cuv === true || inv === true) { out[key] = cuv === true || inv === true; continue; }
+      if (typeof cuv === 'object' && cuv !== null && typeof inv === 'object' && inv !== null) {
+        const r = nuMergeValue(cuv, inv); out[key] = r.value; added += r.added; continue;
+      }
+      if (inv !== '' && inv !== null && inv !== undefined) out[key] = inv;
+    }
+    return { value: out, added };
+  }
+  // Einzelwert: eingelesener Wert gewinnt, außer leer
+  if (incoming === '' || incoming === null || incoming === undefined) return { value: current, added: 0 };
+  return { value: incoming, added: incoming === current ? 0 : 1 };
+}
+
+function nuMergeImportedData(data) {
+  if (!data || typeof data !== 'object') return { keys: 0, entries: 0 };
+  let keysTouched = 0, entriesAdded = 0;
+  for (const k of Object.keys(data)) {
+    if (k === '_meta') continue;
+    if (!nuIsOwnKey(k)) continue;
+    const incoming = data[k];
+    const current = loadJSON(k, null);
+    if (current === null || current === undefined) {
+      try { localStorage.setItem(k, JSON.stringify(incoming)); keysTouched++; } catch (e) {}
+      if (Array.isArray(incoming)) entriesAdded += incoming.length;
+      continue;
+    }
+    const before = JSON.stringify(current);
+    const { value, added } = nuMergeValue(current, incoming);
+    const after = JSON.stringify(value);
+    if (after !== before) {
+      try { localStorage.setItem(k, JSON.stringify(value)); keysTouched++; entriesAdded += added; } catch (e) {}
+    }
+  }
+  const tImp = (data._meta && data._meta.savedAt) || '';
+  const localMeta = loadJSON('nu_meta', null);
+  const tLoc = (localMeta && localMeta.savedAt) || '';
+  const t = tImp > tLoc ? tImp : (tLoc || nuNowISO());
+  try { localStorage.setItem('nu_meta', JSON.stringify({ savedAt: t })); } catch (e) {}
+  return { keys: keysTouched, entries: entriesAdded };
+}
+
+// Liest eine per Mail/AirDrop erhaltene NuDigital-Datei ein und führt ihren Stand
+// mit dem lokalen zusammen. Wird über den blauen Knopf "📥 Stand aus Datei laden" gestartet.
+function nuPickImportFile() {
+  const inp = document.getElementById('nuImportFileInput');
+  if (inp) { inp.value = ''; inp.click(); }
+}
+function nuHandleImportFile(input) {
+  const file = input && input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function () {
+    let data = null;
+    try {
+      const text = String(reader.result || '');
+      const m = text.match(/<script type="application\/json" id="nuDigitalData">([\s\S]*?)<\/script>/);
+      if (!m) { alert('Das ist keine NuDigital-Datei.\n\nBitte die Datei auswählen, die über „💾 Datei speichern & weitergeben" erzeugt wurde (Name beginnt mit „NuDigital_Stand_…").'); return; }
+      const parsed = JSON.parse(m[1] || '{}');
+      const realKeys = Object.keys(parsed).filter(k => k !== '_meta' && nuIsOwnKey(k));
+      if (!realKeys.length) { alert('Diese Datei enthält keine Einträge.\n\nAuf dem anderen Gerät zuerst etwas eintragen und dann erneut „💾 Datei speichern & weitergeben".'); return; }
+      data = parsed;
+    } catch (e) {
+      alert('Die Datei konnte nicht gelesen werden: ' + (e && e.message ? e.message : String(e)));
+      return;
+    }
+    const stamp = data._meta && data._meta.savedAt
+      ? new Date(data._meta.savedAt).toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+      : 'unbekannt';
+    if (!confirm('Stand aus der Datei übernehmen?\n\nDatei-Stand: ' + stamp + '\n\nDie Einträge aus der Datei werden zu den vorhandenen hinzugefügt. Nichts wird gelöscht.')) return;
+    const res = nuMergeImportedData(data);
+    nuUpdateDatenstand();
+    alert('Fertig. ' + res.entries + ' neue Einträge übernommen (' + res.keys + ' Bereiche aktualisiert).\n\nDie Ansicht wird jetzt neu geladen.');
+    location.reload();
+  };
+  reader.onerror = function () { alert('Die Datei konnte nicht gelesen werden.'); };
+  reader.readAsText(file);
 }
 
 function nuUpdateDatenstand() {
