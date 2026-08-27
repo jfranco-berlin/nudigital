@@ -873,7 +873,45 @@ select.text-input { appearance: none; background-image: linear-gradient(45deg, t
   </div>
 
   <div class="alert-box" style="margin-top:18px;">
-    📤 Zur Erinnerung: Tägliche Aufgaben (Häkchen setzen) bleiben nur auf dem jeweiligen Tablet gespeichert. Über den Button "📤 Senden" in jedem Modul wird die komplette Woche als CSV exportiert und ans Management geschickt – das reicht <b>einmal wöchentlich</b>, die Kontrolle vor Ort erfolgt ohnehin täglich direkt am Tablet.
+    📤 Zur Erinnerung: Tägliche Aufgaben (Häkchen setzen) bleiben nur auf dem jeweiligen Tablet gespeichert. Über den Button "📤 Senden" in jedem Modul wird die komplette Woche als PDF-Bericht exportiert und ans Management geschickt – das reicht <b>einmal wöchentlich</b>, die Kontrolle vor Ort erfolgt ohnehin täglich direkt am Tablet.
+  </div>
+
+  <div class="home-title" style="margin-top:26px;">Einträge von einem Gerät auf ein anderes bringen</div>
+  <div class="home-sub">Wenn eine Bruchmeldung, Notiz o. Ä. am Tablet eingetippt wurde und auch auf dem Handy erscheinen soll</div>
+
+  <div class="alert-box" style="margin:0 0 18px;">
+    ⚠️ Das ist <b>kein Live-Abgleich</b>. Die App hat keinen Server. Daten wandern nur, wenn du eine Datei speicherst, verschickst und auf dem anderen Gerät wieder lädst. Für „am Tablet tippen und sofort am Handy sehen" bräuchte es einen Server – das ist bewusst nicht eingebaut.
+  </div>
+
+  <div class="guide-step">
+    <div class="guide-num">A</div>
+    <div class="guide-text">
+      <div class="guide-title">Auf dem Gerät mit den Einträgen: Datei speichern</div>
+      Zurück auf den <b>Start-Bildschirm</b> („Werkzeug auswählen") – nicht in einem Modul. Dort den <b>dunklen</b> Knopf <b>„💾 Datei speichern &amp; weitergeben"</b> drücken. <b>Nicht</b> „📤 Senden" – das macht nur einen PDF-Bericht ohne ladbare Daten.<br><br>
+      Es entsteht eine Datei namens <b>NuDigital_Stand_JJJJ-MM-TT_HHMM.html</b>, ca. <b>1,2 MB</b> groß. Diese per Mail / AirDrop / WhatsApp / Nearby Share an das andere Gerät schicken.
+    </div>
+  </div>
+
+  <div class="guide-step">
+    <div class="guide-num">B</div>
+    <div class="guide-text">
+      <div class="guide-title">Auf dem anderen Gerät: Stand aus Datei laden</div>
+      Nu Digital öffnen → Start-Bildschirm → <b>blauer</b> Knopf <b>„📥 Stand aus Datei laden"</b> → die Datei auswählen, deren Name mit <b>„NuDigital_Stand_"</b> beginnt (~1,2 MB).<br><br>
+      <b>Nicht</b> eine Datei „Bruchliste_…" (das ist ein Bericht). <b>Nicht</b> die Datei, die nur „NuDigital" heißt (das ist die App selbst).<br><br>
+      Rückfrage bestätigen → die Einträge sind da. Vorhandene Einträge bleiben erhalten, die neuen werden <b>dazugelegt</b>, exakt gleiche Einträge nur einmal.
+    </div>
+  </div>
+
+  <div class="guide-step">
+    <div class="guide-num">?</div>
+    <div class="guide-text">
+      <div class="guide-title">iPhone &amp; Android</div>
+      Der Ablauf ist auf beiden gleich, nur die Menüs sehen anders aus. Auf <b>Android</b> landet die gespeicherte Datei im Ordner <b>„Downloads"</b>. Wenn Android eine Mail-Datei im Browser <i>anzeigt</i> statt zu speichern: erst <b>„Herunterladen"</b> wählen, dann aus „Downloads" laden. Taucht die Datei in der Auswahl nicht auf: oben von „HTML" auf <b>„Alle Dateien"</b> umstellen.
+    </div>
+  </div>
+
+  <div class="alert-box" style="margin-top:18px;">
+    Merksatz: <b>„📤 Senden"</b> (in jedem Modul) = PDF-Bericht fürs Management, zum Lesen. <b>„💾 Datei speichern &amp; weitergeben"</b> (Start-Bildschirm) = Datei mit allen Einträgen, um sie auf ein anderes Gerät zu bringen. Nur die zweite Datei lässt sich mit <b>„📥 Stand aus Datei laden"</b> einlesen.
   </div>
 </div>
 
@@ -1679,7 +1717,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
 <script>
 // ===================== SHARED UTILS =====================
-const APP_BUILD = '27.08.2026 17:36';
+const APP_BUILD = '27.08.2026 18:03';
 const DAYS = ['MO','DI','MI','DO','FR','SA','SO'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
@@ -1895,10 +1933,10 @@ function nuHandleImportFile(input) {
     try {
       const text = String(reader.result || '');
       const m = text.match(/<script type="application\/json" id="nuDigitalData">([\s\S]*?)<\/script>/);
-      if (!m) { alert('Das ist keine NuDigital-Datei.\n\nBitte die Datei auswählen, die über „💾 Datei speichern & weitergeben" erzeugt wurde (Name beginnt mit „NuDigital_Stand_…").'); return; }
+      if (!m) { alert('Das ist keine NuDigital-Datei.\n\nDu hast wahrscheinlich einen PDF-Bericht („Bruchliste_…") ausgewählt. Der entsteht über „📤 Senden" und lässt sich nicht laden.\n\nGebraucht wird die Datei vom Knopf „💾 Datei speichern & weitergeben" auf dem Start-Bildschirm – ihr Name beginnt mit „NuDigital_Stand_…" und sie ist ca. 1,2 MB groß.'); return; }
       const parsed = JSON.parse(m[1] || '{}');
       const realKeys = Object.keys(parsed).filter(k => k !== '_meta' && nuIsOwnKey(k));
-      if (!realKeys.length) { alert('Diese Datei enthält keine Einträge.\n\nAuf dem anderen Gerät zuerst etwas eintragen und dann erneut „💾 Datei speichern & weitergeben".'); return; }
+      if (!realKeys.length) { alert('Diese Datei enthält keine Einträge.\n\nMöglich ist: (1) Du hast die App-Datei selbst gewählt (heißt nur „NuDigital"). Nimm die Datei „NuDigital_Stand_…".\n(2) Auf dem anderen Gerät war noch nichts eingetragen – dort zuerst etwas eintragen, dann erneut „💾 Datei speichern & weitergeben" drücken.'); return; }
       data = parsed;
     } catch (e) {
       alert('Die Datei konnte nicht gelesen werden: ' + (e && e.message ? e.message : String(e)));
