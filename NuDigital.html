@@ -1677,7 +1677,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
 <script>
 // ===================== SHARED UTILS =====================
-const APP_BUILD = '26.08.2026 14:20';
+const APP_BUILD = '27.08.2026 17:12';
 const DAYS = ['MO','DI','MI','DO','FR','SA','SO'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
@@ -1731,11 +1731,44 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ---- Speicher-Warnung: sichtbarer Balken, wenn dieses Gerät nicht dauerhaft speichert ----
+// Greift in zwei Fällen: (1) Selbsttest beim Start schlägt fehl, (2) ein echtes saveJSON scheitert.
+// Bewusst als roter Balken ganz oben, ausblendbar – erscheint bei erneutem Fehler wieder.
+function nuShowStorageBanner(detail) {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById('nuStorageBanner')) return;
+  const bar = document.createElement('div');
+  bar.id = 'nuStorageBanner';
+  bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:10000;background:#b00020;color:#fff;padding:12px 70px 12px 16px;font-size:0.85rem;line-height:1.45;box-shadow:0 2px 12px rgba(0,0,0,.35);';
+  bar.innerHTML =
+    '<strong>⚠️ Dieses Gerät speichert Eingaben nicht dauerhaft.</strong><br>' +
+    'Was hier eingetragen wird, kann beim Schließen der App verloren gehen. Bitte die App über das ' +
+    'Startbildschirm-Icon öffnen und in den Chrome-Einstellungen „Cookies und Websitedaten beim ' +
+    'Schließen löschen" ausschalten. Im Zweifel jeden Eintrag sofort über „📤 Senden" sichern.' +
+    (detail ? '<br><span style="opacity:.8;font-size:.78rem">' + escHtml(detail) + '</span>' : '') +
+    '<button type="button" onclick="this.parentElement.remove()" style="position:absolute;right:10px;top:10px;background:transparent;border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:.75rem">ausblenden</button>';
+  (document.body || document.documentElement).appendChild(bar);
+}
+
 function loadJSON(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
   catch { return fallback; }
 }
-function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); nuTouchMeta(); }
+function saveJSON(key, val) {
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch (e) {
+    nuShowStorageBanner('Speichern fehlgeschlagen: ' + (e && e.message ? e.message : String(e)));
+    alert('⚠️ Konnte nicht speichern!\n\n'
+      + 'Dieses Gerät erlaubt gerade kein dauerhaftes Speichern – die letzte Eingabe ist '
+      + 'möglicherweise nicht gesichert.\n\n'
+      + 'Bitte die App über das Startbildschirm-Icon öffnen (nicht über einen Browser-Tab oder '
+      + 'einen Mail-Link) und den Eintrag erneut versuchen. Wichtiges vorher notieren.');
+    return false;
+  }
+  nuTouchMeta();
+  return true;
+}
 function hasOverride(key) { return localStorage.getItem(key) !== null; }
 
 // ===================== DATEI-MITNAHME (Stand + Weitergabe) =====================
@@ -4896,6 +4929,42 @@ window.addEventListener('pageshow', function(event) {
     location.reload();
   }
 });
+
+// ---- Speicher-Selbsttest beim Start ----
+// Prüft mit einem echten Schreib-/Lese-/Löschversuch, ob localStorage auf diesem Gerät
+// überhaupt funktioniert (privater Modus, deaktivierte Website-Daten, „beim Schließen löschen"
+// u. Ä. lassen den Versuch scheitern). Schlägt er fehl → roter Warnbalken.
+function nuStorageSelfTest() {
+  try {
+    const k = '__nu_probe__';
+    localStorage.setItem(k, '1');
+    const ok = localStorage.getItem(k) === '1';
+    localStorage.removeItem(k);
+    if (!ok) { nuShowStorageBanner('Schreibtest: gespeicherter Wert kam nicht zurück.'); return false; }
+    return true;
+  } catch (e) {
+    nuShowStorageBanner('Schreibtest fehlgeschlagen: ' + (e && e.message ? e.message : String(e)));
+    return false;
+  }
+}
+
+// ---- Browser bitten, den Speicher nicht zu verwerfen ----
+// Wirkt vor allem auf Android-Tablets zuverlässig; ein "nicht gewährt" ist normal und harmlos
+// (kein Warnbalken), weil viele Browser das erst nach Nutzungshäufigkeit selbst freischalten.
+async function nuRequestPersistence() {
+  try {
+    if (navigator.storage && typeof navigator.storage.persist === 'function') {
+      const already = typeof navigator.storage.persisted === 'function'
+        ? await navigator.storage.persisted() : false;
+      if (!already) {
+        const granted = await navigator.storage.persist();
+        console.info('[NuDigital] Persistenter Speicher:', granted ? 'gewährt' : 'nicht gewährt (unkritisch)');
+      }
+    }
+  } catch (e) { /* nicht kritisch */ }
+}
+
+if (nuStorageSelfTest()) { nuRequestPersistence(); }
 
 // Hash-Routing für PWA-Schnellzugriffe (manifest.json "shortcuts") —
 // z. B. index.html#bruchliste springt direkt ins Modul statt über den Hub.
