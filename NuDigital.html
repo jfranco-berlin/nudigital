@@ -877,26 +877,32 @@ select.text-input { appearance: none; background-image: linear-gradient(45deg, t
   </div>
 
   <div class="home-title" style="margin-top:26px;">Einträge von einem Gerät auf ein anderes bringen</div>
-  <div class="home-sub">Wenn eine Bruchmeldung, Notiz o. Ä. am Tablet eingetippt wurde und auch auf dem Handy erscheinen soll</div>
+  <div class="home-sub">Funktioniert in <b>beide Richtungen</b>: Tablet&nbsp;→&nbsp;Handy und Handy&nbsp;→&nbsp;Tablet. Es tauschen nur die Rollen: „Gerät mit den neuen Einträgen" = das, wo zuletzt getippt wurde.</div>
 
   <div class="alert-box" style="margin:0 0 18px;">
-    ⚠️ Das ist <b>kein Live-Abgleich</b>. Die App hat keinen Server. Daten wandern nur, wenn du eine Datei speicherst, verschickst und auf dem anderen Gerät wieder lädst. Für „am Tablet tippen und sofort am Handy sehen" bräuchte es einen Server – das ist bewusst nicht eingebaut.
+    ⚠️ Das ist <b>kein Live-Abgleich</b>. Die App hat keinen Server. Daten wandern nur, wenn du auf dem einen Gerät eine Datei speicherst, sie verschickst und auf dem anderen Gerät wieder lädst. Für „hier tippen und sofort auf dem anderen Gerät sehen" bräuchte es einen Server – das ist bewusst nicht eingebaut.
+  </div>
+
+  <div class="alert-box" style="margin:0 0 18px; background:#eef6ff; border-color:#0369a1;">
+    <b>Beispiel Tablet → Handy:</b> Am Tablet speichern (Schritt A), Datei ans Handy schicken, am Handy laden (Schritt B).<br>
+    <b>Beispiel Handy → Tablet:</b> Am Handy speichern (Schritt A), Datei ans Tablet schicken, am Tablet laden (Schritt B).<br>
+    <b>Am saubersten:</b> immer nur in <b>eine</b> Richtung pro Runde übertragen und danach auf beiden Geräten mit demselben Stand weiterarbeiten – nicht gleichzeitig auf beiden Geräten dieselbe Woche bearbeiten und dann kreuzweise übertragen.
   </div>
 
   <div class="guide-step">
     <div class="guide-num">A</div>
     <div class="guide-text">
-      <div class="guide-title">Auf dem Gerät mit den Einträgen: Datei speichern</div>
-      Zurück auf den <b>Start-Bildschirm</b> („Werkzeug auswählen") – nicht in einem Modul. Dort den <b>dunklen</b> Knopf <b>„💾 Datei speichern &amp; weitergeben"</b> drücken. <b>Nicht</b> „📤 Senden" – das macht nur einen PDF-Bericht ohne ladbare Daten.<br><br>
-      Es entsteht eine Datei namens <b>NuDigital_Stand_JJJJ-MM-TT_HHMM.html</b>, ca. <b>1,2 MB</b> groß. Diese per Mail / AirDrop / WhatsApp / Nearby Share an das andere Gerät schicken.
+      <div class="guide-title">Schritt A – auf dem Quell-Gerät (dort, wo zuletzt getippt wurde): Datei speichern</div>
+      Egal ob Tablet oder Handy. Zurück auf den <b>Start-Bildschirm</b> („Werkzeug auswählen") – nicht in einem Modul. Dort den <b>dunklen</b> Knopf <b>„💾 Datei speichern &amp; weitergeben"</b> drücken. <b>Nicht</b> „📤 Senden" – das macht nur einen PDF-Bericht ohne ladbare Daten.<br><br>
+      Es entsteht eine Datei namens <b>NuDigital_Stand_JJJJ-MM-TT_HHMM.html</b>, ca. <b>1,2 MB</b> groß. Diese per Mail / AirDrop / WhatsApp / Nearby Share an das <b>Ziel-Gerät</b> schicken.
     </div>
   </div>
 
   <div class="guide-step">
     <div class="guide-num">B</div>
     <div class="guide-text">
-      <div class="guide-title">Auf dem anderen Gerät: Stand aus Datei laden</div>
-      Nu Digital öffnen → Start-Bildschirm → <b>blauer</b> Knopf <b>„📥 Stand aus Datei laden"</b> → die Datei auswählen, deren Name mit <b>„NuDigital_Stand_"</b> beginnt (~1,2 MB).<br><br>
+      <div class="guide-title">Schritt B – auf dem Ziel-Gerät (das die Einträge bekommen soll): Stand aus Datei laden</div>
+      Egal ob Tablet oder Handy. Nu Digital öffnen → Start-Bildschirm → <b>blauer</b> Knopf <b>„📥 Stand aus Datei laden"</b> → die Datei auswählen, deren Name mit <b>„NuDigital_Stand_"</b> beginnt (~1,2 MB).<br><br>
       <b>Nicht</b> eine Datei „Bruchliste_…" (das ist ein Bericht). <b>Nicht</b> die Datei, die nur „NuDigital" heißt (das ist die App selbst).<br><br>
       Rückfrage bestätigen → die Einträge sind da. Vorhandene Einträge bleiben erhalten, die neuen werden <b>dazugelegt</b>, exakt gleiche Einträge nur einmal.
     </div>
@@ -1717,7 +1723,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
 <script>
 // ===================== SHARED UTILS =====================
-const APP_BUILD = '27.08.2026 18:10';
+const APP_BUILD = '28.08.2026 12:47';
 const DAYS = ['MO','DI','MI','DO','FR','SA','SO'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 
